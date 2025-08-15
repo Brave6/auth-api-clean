@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const auth = require('../middleware/auth'); // ✅ JWT middleware
 
-router.get('/', async (req, res) => {
+// GET /api/bookings - get only bookings for logged-in user
+router.get('/', auth, async (req, res) => {
   try {
-    const bookings = await Booking.find().populate({
-      path: 'productId',
-      model: 'Product',     // ✅ explicitly define model name
-      select: 'title price duration description imageUrl discountedPrice' // ✅ all you want to return
-    });
+    const bookings = await Booking.find({ userId: req.user.id }) // ✅ filter by logged-in user
+      .populate({
+        path: 'productId',
+        model: 'Product',
+        select: 'title price duration description imageUrl discountedPrice'
+      });
 
     res.status(200).json(bookings);
   } catch (error) {
@@ -17,9 +20,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
-router.post('/', async (req, res) => {
+// POST /api/bookings - create booking for logged-in user
+router.post('/', auth, async (req, res) => {
   try {
     const { name, phone, date, time, productId } = req.body;
 
@@ -33,6 +35,7 @@ router.post('/', async (req, res) => {
       date,
       time,
       productId,
+      userId: req.user.id // ✅ attach logged-in user's ID
     });
 
     await newBooking.save();

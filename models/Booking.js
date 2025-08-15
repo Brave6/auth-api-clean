@@ -5,10 +5,8 @@ const bookingSchema = new mongoose.Schema({
   phone: String,
   date: String,
   time: String,
-  productId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product', // This should match the model name of your product schema
-  },
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // ✅ store user
 });
 
 module.exports = mongoose.model('Booking', bookingSchema);
